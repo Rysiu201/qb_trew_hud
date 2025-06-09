@@ -217,7 +217,13 @@ window.onload = function () {
 				var vehicleSeatbelt = document.querySelector('#seatbelt');
 				var vehicleLights = document.querySelector('#lights');
 				var vehicleSignals = document.querySelector('#signals');
-				var vehicleFuel = document.querySelector('#fuel');
+                                var vehicleFuel = document.querySelector('#fuel');
+
+                                if (data.electric === true) {
+                                        vehicleFuel.querySelector('i').className = 'fas fa-battery-full';
+                                } else {
+                                        vehicleFuel.querySelector('i').className = 'fas fa-gas-pump';
+                                }
 				var vehicleCruiser = document.querySelector('#vehicle-speed strong');
 				var vehiclesCars = [0,1,2,3,4,5,6,7,8,9,10,11,12,17,18,19,20];
 
