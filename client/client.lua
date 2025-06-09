@@ -166,9 +166,13 @@ CreateThread(function()
 				vehicleNailSpeed = math.ceil(  280 - math.ceil( math.ceil(vehicleSpeed * 205) / Config.vehicle.maxSpeed) )
 			end
 
-			-- Vehicle Fuel and Gear
-			local vehicleFuel
-			vehicleFuel = GetVehicleFuelLevel(vehicle)
+                        -- Vehicle Fuel and Gear
+                        local vehicleFuel
+                        vehicleFuel = GetVehicleFuelLevel(vehicle)
+
+                        -- Detect if vehicle uses electric power
+                        local modelName = string.lower(GetDisplayNameFromVehicleModel(GetEntityModel(vehicle)))
+                        local isElectric = has_value(Config.electricVehicles, modelName)
 
 			local vehicleGear = GetVehicleCurrentGear(vehicle)
 
@@ -232,7 +236,8 @@ CreateThread(function()
 				speed = vehicleSpeed,
 				nail = vehicleNailSpeed,
 				gear = vehicleGear,
-				fuel = vehicleFuel,
+                                fuel = vehicleFuel,
+                                electric = isElectric,
 				lights = vehicleIsLightsOn,
 				signals = vehicleSignalIndicator,
 				cruiser = vehicleCruiser,
@@ -262,7 +267,8 @@ CreateThread(function()
 				seatbelt = { status = seatbeltIsOn },
 				cruiser = vehicleCruiser,
 				signals = vehicleSignalIndicator,
-				type = 0,
+                                type = 0,
+                                electric = false,
 			}
 
 			if not Config.ui.showMinimapOnFoot then
