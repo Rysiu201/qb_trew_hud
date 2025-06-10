@@ -96,6 +96,127 @@ function has_value(tab, val)
     return false
 end
 
+-- Eject the player from the current vehicle
+local function EjectFromVehicle()
+    local ped = PlayerPedId()
+    local veh = GetVehiclePedIsIn(ped, false)
+    if veh and veh ~= 0 then
+        local coords = GetOffsetFromEntityInWorldCoords(veh, 1.0, 0.0, 1.0)
+        SetEntityCoords(ped, coords.x, coords.y, coords.z)
+        Wait(1)
+        SetPedToRagdoll(ped, 5511, 5511, 0, 0, 0, 0)
+        SetEntityVelocity(ped, veloc.x * 4.0, veloc.y * 4.0, veloc.z * 4.0)
+        local ejectSpeed = math.ceil(GetEntitySpeed(ped) * 8)
+        local health = GetEntityHealth(ped)
+        if health - ejectSpeed > 0 then
+            SetEntityHealth(ped, health - ejectSpeed)
+        elseif health ~= 0 then
+            SetEntityHealth(ped, 0)
+        end
+    end
+end
+
+-- Monitor vehicle damage to eject player when not wearing a seatbelt
+local function MonitorVehicleEjection()
+    CreateThread(function()
+        local playerPed = PlayerPedId()
+        while IsPedInAnyVehicle(playerPed, false) do
+            Wait(0)
+            local veh = GetVehiclePedIsIn(playerPed, false)
+            if veh and veh ~= 0 then
+                thisFrameSpeed = GetEntitySpeed(veh) * 3.6
+                currentBodyHealth = GetVehicleBodyHealth(veh)
+                if frameBodyChange ~= 0 then
+                    if lastFrameSpeed > 110 and thisFrameSpeed < (lastFrameSpeed * 0.75) and not damageDone then
+                        if frameBodyChange > 18.0 then
+                            if not seatbeltIsOn and not IsThisModelABike(veh) then
+                                if math.random(math.ceil(lastFrameSpeed)) > 60 then
+                                    EjectFromVehicle()
+                                end
+                            elseif seatbeltIsOn and not IsThisModelABike(veh) then
+                                if lastFrameSpeed > 150 and math.random(math.ceil(lastFrameSpeed)) > 150 then
+                                    EjectFromVehicle()
+                                end
+                            end
+                        else
+                            if not seatbeltIsOn and not IsThisModelABike(veh) then
+                                if math.random(math.ceil(lastFrameSpeed)) > 60 then
+                                    EjectFromVehicle()
+                                end
+                            elseif seatbeltIsOn and not IsThisModelABike(veh) then
+                                if lastFrameSpeed > 120 and math.random(math.ceil(lastFrameSpeed)) > 200 then
+                                    EjectFromVehicle()
+                                end
+                            end
+                        end
+                        damageDone = true
+                        SetVehicleEngineOn(veh, false, true, true)
+                    end
+                    if currentBodyHealth < 350.0 and not damageDone then
+                        damageDone = true
+                        SetVehicleEngineOn(veh, false, true, true)
+                        Wait(1000)
+                    end
+                end
+                if lastFrameSpeed < 100 then
+                    Wait(100)
+                    tick = 0
+                end
+                frameBodyChange = newBodyHealth - currentBodyHealth
+                if tick > 0 then
+                    tick = tick - 1
+                    if tick == 1 then
+                        lastFrameSpeed = GetEntitySpeed(veh) * 3.6
+                    end
+                else
+                    if damageDone then
+                        damageDone = false
+                        frameBodyChange = 0
+                        lastFrameSpeed = GetEntitySpeed(veh) * 3.6
+                    end
+                    lastFrameSpeed2 = GetEntitySpeed(veh) * 3.6
+                    if lastFrameSpeed2 > lastFrameSpeed then
+                        lastFrameSpeed = GetEntitySpeed(veh) * 3.6
+                    end
+                    if lastFrameSpeed2 < lastFrameSpeed then
+                        tick = 25
+                    end
+                end
+                if tick < 0 then
+                    tick = 0
+                end
+                newBodyHealth = GetVehicleBodyHealth(veh)
+                veloc = GetEntityVelocity(veh)
+            else
+                lastFrameSpeed2 = 0
+                lastFrameSpeed = 0
+                newBodyHealth = 0
+                currentBodyHealth = 0
+                frameBodyChange = 0
+                Wait(2000)
+                break
+            end
+        end
+    end)
+end
+
+-- Start ejection monitoring whenever entering a vehicle
+CreateThread(function()
+    local wasInVehicle = false
+    while true do
+        Wait(1000)
+        local ped = PlayerPedId()
+        if IsPedInAnyVehicle(ped, false) then
+            if not wasInVehicle then
+                wasInVehicle = true
+                MonitorVehicleEjection()
+            end
+        else
+            wasInVehicle = false
+        end
+    end
+end)
+
 
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
 	Startup()
@@ -104,11 +225,21 @@ end)
 -- Vehicle Info
 local vehicleCruiser
 local vehicleSignalIndicator = 'off'
-local seatbeltEjectSpeed = 45.0 
+local seatbeltEjectSpeed = 45.0
 local seatbeltEjectAccel = 100.0
 local seatbeltIsOn = false
 local currSpeed = 0.0
 local prevVelocity = {x = 0.0, y = 0.0, z = 0.0}
+-- Variables for improved ejection
+local lastFrameSpeed = 0.0
+local lastFrameSpeed2 = 0.0
+local thisFrameSpeed = 0.0
+local newBodyHealth = 0.0
+local currentBodyHealth = 0.0
+local frameBodyChange = 0.0
+local tick = 0
+local damageDone = false
+local veloc = {x = 0.0, y = 0.0, z = 0.0}
 
 -- From ESX Legacy/ESX Infinity
 function RegisterInput(command_name, label, input_group, key, on_press)
@@ -166,9 +297,13 @@ CreateThread(function()
 				vehicleNailSpeed = math.ceil(  280 - math.ceil( math.ceil(vehicleSpeed * 205) / Config.vehicle.maxSpeed) )
 			end
 
-			-- Vehicle Fuel and Gear
-			local vehicleFuel
-			vehicleFuel = GetVehicleFuelLevel(vehicle)
+                        -- Vehicle Fuel and Gear
+                        local vehicleFuel
+                        vehicleFuel = GetVehicleFuelLevel(vehicle)
+
+                        -- Detect if vehicle uses electric power
+                        local modelName = string.lower(GetDisplayNameFromVehicleModel(GetEntityModel(vehicle)))
+                        local isElectric = has_value(Config.electricVehicles, modelName)
 
 			local vehicleGear = GetVehicleCurrentGear(vehicle)
 
@@ -206,25 +341,12 @@ CreateThread(function()
 
                 SetPedConfigFlag(PlayerPedId(), 32, true)
 
-                if not seatbeltIsOn then
-                	local vehIsMovingFwd = GetEntitySpeedVector(vehicle, true).y > 1.0
-                    local vehAcc = (prevSpeed - currSpeed) / GetFrameTime()
-                    if (vehIsMovingFwd and (prevSpeed > (seatbeltEjectSpeed/2.237)) and (vehAcc > (seatbeltEjectAccel*9.81))) then
-
-                        SetEntityCoords(player, position.x, position.y, position.z - 0.47, true, true, true)
-                        SetEntityVelocity(player, prevVelocity.x, prevVelocity.y, prevVelocity.z)
-                        SetPedToRagdoll(player, 1000, 1000, 0, 0, 0, 0)
-                    else
-                        -- Update previous velocity for ejecting player
-                        prevVelocity = GetEntityVelocity(vehicle)
-                    end
-
-                else
-
-                	DisableControlAction(0, 75)
-
-                end
-			end
+               if seatbeltIsOn then
+                       DisableControlAction(0, 75)
+               else
+                       prevVelocity = GetEntityVelocity(vehicle)
+               end
+                       end
 
 			vehicleInfo = {
 				action = 'updateVehicle',
@@ -232,7 +354,8 @@ CreateThread(function()
 				speed = vehicleSpeed,
 				nail = vehicleNailSpeed,
 				gear = vehicleGear,
-				fuel = vehicleFuel,
+                                fuel = vehicleFuel,
+                                electric = isElectric,
 				lights = vehicleIsLightsOn,
 				signals = vehicleSignalIndicator,
 				cruiser = vehicleCruiser,
@@ -262,7 +385,8 @@ CreateThread(function()
 				seatbelt = { status = seatbeltIsOn },
 				cruiser = vehicleCruiser,
 				signals = vehicleSignalIndicator,
-				type = 0,
+                                type = 0,
+                                electric = false,
 			}
 
 			if not Config.ui.showMinimapOnFoot then
@@ -511,10 +635,10 @@ RegisterInput("seatbelt", "Pas bezpieczeństwa", "keyboard", "b", function()
 	if not (IsPedInAnyVehicle(player, false) and GetIsVehicleEngineRunning(vehicle)) then
 		return
 	end
-	if has_value(vehiclesCars, vehicleClass) ~= true and vehicleClass == 8 then 
-		return 
-	end
-	seatbeltIsOn = not seatbeltIsOn
+       if vehicleClass == 8 then
+               return
+       end
+       seatbeltIsOn = not seatbeltIsOn
 end)
 
 RegisterInput("leftindicator", "Left Indicator", "keyboard", Config.vehicle.keys.signalLeft, function()
