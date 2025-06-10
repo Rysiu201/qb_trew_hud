@@ -225,7 +225,7 @@ window.onload = function () {
                                         vehicleFuel.querySelector('i').className = 'fas fa-gas-pump';
                                 }
 				var vehicleCruiser = document.querySelector('#vehicle-speed strong');
-				var vehiclesCars = [0,1,2,3,4,5,6,7,8,9,10,11,12,17,18,19,20];
+                                var vehiclesCars = [0,1,2,3,4,5,6,7,9,10,11,12,17,18,19,20];
 
 				if (data.status == true) {
 					if (vehicleInfo.classList.contains('inactive')) {
@@ -235,7 +235,7 @@ window.onload = function () {
 						vehicleSignals.style.display = 'none';
 						vehicleFuel.style.display = 'none';
 
-						if (vehiclesCars.indexOf(data.type) > -1) {
+                                                if (vehiclesCars.indexOf(data.type) > -1 && data.type !== 8) {
 							document.querySelector('#vehicle-others').style.display = 'none';
 							document.querySelector('#vehicle-gear').style.display = 'block';
 
