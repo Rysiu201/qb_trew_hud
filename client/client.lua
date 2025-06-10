@@ -5,6 +5,18 @@ local vehiclesCars = {0,1,2,3,4,5,6,7,8,9,10,11,12,17,18,19,20};
 local isTalking = false
 local Playerid = PlayerId()
 local ServerId = 0
+
+-- Variables used for improved ejection logic
+local lastFrameSpeed = 0.0
+local lastFrameSpeed2 = 0.0
+local thisFrameSpeed = 0.0
+local newBodyHealth = 0.0
+local currentBodyHealth = 0.0
+local frameBodyChange = 0.0
+local tick = 0
+local damageDone = false
+local veloc = {x = 0.0, y = 0.0, z = 0.0}
+
 function Startup()
 	ServerId = GetPlayerServerId(Playerid)
 	SendNUIMessage({ action = 'ui', config = Config.ui })
@@ -334,13 +346,23 @@ CreateThread(function()
 			end
 
 			-- Vehicle Seatbelt
-			if has_value(vehiclesCars, vehicleClass) and vehicleClass ~= 8 then
+                        if has_value(vehiclesCars, vehicleClass) then
 
-				local prevSpeed = currSpeed
+                                local prevSpeed = currSpeed
                 currSpeed = vehicleSpeedSource
 
                 SetPedConfigFlag(PlayerPedId(), 32, true)
 
+                if vehicleClass ~= 8 then
+                        if seatbeltIsOn then
+                                DisableControlAction(0, 75)
+                        else
+                                prevVelocity = GetEntityVelocity(vehicle)
+                        end
+                else
+                        seatbeltIsOn = false
+                end
+                        end
                if seatbeltIsOn then
                        DisableControlAction(0, 75)
                else

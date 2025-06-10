@@ -225,6 +225,7 @@ window.onload = function () {
                                         vehicleFuel.querySelector('i').className = 'fas fa-gas-pump';
                                 }
 				var vehicleCruiser = document.querySelector('#vehicle-speed strong');
+                                var vehiclesCars = [0,1,2,3,4,5,6,7,8,9,10,11,12,17,18,19,20];
                                 var vehiclesCars = [0,1,2,3,4,5,6,7,9,10,11,12,17,18,19,20];
 
 				if (data.status == true) {
