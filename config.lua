@@ -15,8 +15,8 @@ Config.date = {
 }
 
 Config.vehicle = {
-	speedUnit = 'MPH',
-	maxSpeed = 175,
+        speedUnit = 'MPH',
+        maxSpeed = 175,
 
 	keys = {
 		seatbelt 	= 'b',
@@ -24,7 +24,18 @@ Config.vehicle = {
 		signalLeft	= 'LEFT',
 		signalRight	= 'RIGHT',
 		signalBoth	= 'DOWN',
-	}
+        }
+}
+
+-- List of electric vehicle model names to show battery icon
+Config.electricVehicles = {
+    'raiden',
+    'tezeract',
+    'cyclone',
+    'neon',
+    'voltic',
+    'imorgon',
+    'iwagen',
 }
 
 Config.ui = {
