@@ -242,6 +242,17 @@ local seatbeltEjectAccel = 100.0
 local seatbeltIsOn = false
 local currSpeed = 0.0
 local prevVelocity = {x = 0.0, y = 0.0, z = 0.0}
+-- Variables for improved ejection
+local lastFrameSpeed = 0.0
+local lastFrameSpeed2 = 0.0
+local thisFrameSpeed = 0.0
+local newBodyHealth = 0.0
+local currentBodyHealth = 0.0
+local frameBodyChange = 0.0
+local tick = 0
+local damageDone = false
+local veloc = {x = 0.0, y = 0.0, z = 0.0}
+
 -- From ESX Legacy/ESX Infinity
 function RegisterInput(command_name, label, input_group, key, on_press)
     RegisterCommand(command_name, on_press)
@@ -352,6 +363,12 @@ CreateThread(function()
                         seatbeltIsOn = false
                 end
                         end
+               if seatbeltIsOn then
+                       DisableControlAction(0, 75)
+               else
+                       prevVelocity = GetEntityVelocity(vehicle)
+               end
+                       end
 
 			vehicleInfo = {
 				action = 'updateVehicle',
