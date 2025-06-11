@@ -152,32 +152,47 @@ window.onload = function () {
 
 			setStatus: function(data) {
 
-				if (data.isdead == true) {
-					if (document.querySelector('#health').classList.contains('dead') == false) {
-						document.querySelector('#health').classList.add('dead');
-						for (i = 0; i < data.status.length; i++) { document.querySelector('#'+data.status[i].name+' span').style.height = '0'; }	
-					}
-				}
-				else {
-					for (i = 0; i < data.status.length; i++) {
-						if ((data.status[i].name == 'hunger') || (data.status[i].name == 'thirst')) { var statusValue = Math.floor(100 - data.status[i].value); }
-						else { var statusValue = Math.floor(data.status[i].value); }
-						if (document.querySelector('#'+data.status[i].name+' span')) { document.querySelector('#'+data.status[i].name+' span').style.height = statusValue+'%'; }
-						if (statusValue <= 35) {
-							if (document.querySelector('#'+data.status[i].name)) {
-								if (document.querySelector('#'+data.status[i].name).classList.contains('dying') == false) {
-									document.querySelector('#'+data.status[i].name).classList.add('dying');	
-								}
-							}
-						}
-						else {
-							if (document.querySelector('#'+data.status[i].name)) { document.querySelector('#'+data.status[i].name).classList.remove('dying'); }
-							
-						}
-					}
-					if (document.querySelector('#health').classList.contains('dead')) { document.querySelector('#health').classList.remove('dead'); }
-				}
-			},
+                                var armorValue = null;
+
+                                if (data.isdead == true) {
+                                        if (document.querySelector('#health').classList.contains('dead') == false) {
+                                                document.querySelector('#health').classList.add('dead');
+                                                for (i = 0; i < data.status.length; i++) { document.querySelector('#'+data.status[i].name+' span').style.height = '0'; }
+                                        }
+                                }
+                                else {
+                                        for (i = 0; i < data.status.length; i++) {
+                                                if ((data.status[i].name == 'hunger') || (data.status[i].name == 'thirst')) { var statusValue = Math.floor(100 - data.status[i].value); }
+                                                else { var statusValue = Math.floor(data.status[i].value); }
+                                                if (document.querySelector('#'+data.status[i].name+' span')) { document.querySelector('#'+data.status[i].name+' span').style.height = statusValue+'%'; }
+                                                if (statusValue <= 35) {
+                                                        if (document.querySelector('#'+data.status[i].name)) {
+                                                                if (document.querySelector('#'+data.status[i].name).classList.contains('dying') == false) {
+                                                                        document.querySelector('#'+data.status[i].name).classList.add('dying');
+                                                                }
+                                                        }
+                                                }
+                                                else {
+                                                        if (document.querySelector('#'+data.status[i].name)) { document.querySelector('#'+data.status[i].name).classList.remove('dying'); }
+
+                                                }
+                                                if (data.status[i].name == 'armor') { armorValue = statusValue; }
+                                        }
+                                        if (document.querySelector('#health').classList.contains('dead')) { document.querySelector('#health').classList.remove('dead'); }
+
+                                        var healthEl = document.querySelector('#health');
+                                        var armorEl = document.querySelector('#armor');
+                                        if (healthEl && armorEl && armorValue !== null) {
+                                                if (armorValue < 1) {
+                                                        armorEl.style.display = 'none';
+                                                        healthEl.classList.add('expanded');
+                                                } else {
+                                                        armorEl.style.display = 'block';
+                                                        healthEl.classList.remove('expanded');
+                                                }
+                                        }
+                                }
+                        },
 
 
 			updateWeapon: function(data) {
@@ -211,7 +226,10 @@ window.onload = function () {
 
 
 
-			updateVehicle: function(data) {
+                        updateVehicle: function(data) {
+
+                                if (data.status === true) { document.body.classList.add('inVehicle'); }
+                                else { document.body.classList.remove('inVehicle'); }
 
 				var vehicleInfo = document.querySelector('.info.vehicle');
 				var vehicleSeatbelt = document.querySelector('#seatbelt');
