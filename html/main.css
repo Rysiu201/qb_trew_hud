@@ -1,4 +1,4 @@
-﻿*, *:before, *:after {
+*, *:before, *:after {
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
@@ -32,7 +32,6 @@ div.separator { display: block; clear: both; width: 100%; }
 
 
 .icon { display: block; position: relative; padding: 10px 8px; margin: 10px 5px 0 5px; width: 30px; height: 30px; border-radius: 100px; overflow: hidden; background: rgba(0,0,0,0.35); }
-.icon.expanded { width: 60px; }
 
 .icon i { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); color: #FFF; z-index: 11; font-size: 15px; }
 .icon img { width: 16px; margin: -3px 0 0 0; }
@@ -85,17 +84,6 @@ div.separator { display: block; clear: both; width: 100%; }
 .info.player #status ul li#health.dead { animation: trew-pulse 500ms infinite; }
 .info.player #status ul li#health.dead span { height: 0 !important; }
 .info.player #status ul li#health.dead i.fas:before { content: '\f714'; }
-
-body.inVehicle #status #thirst,
-body.inVehicle #status #hunger {
-    position: absolute;
-    right: 25px;
-}
-
-body.inVehicle #status #thirst { bottom: 70px; }
-body.inVehicle #status #hunger { bottom: 110px; }
-
-body.inVehicle .info.time-and-place { right: 65px; bottom: 18px; }
 
 .info.vehicle { bottom: 20px; left: 50%; transform: translate(-50%,0); z-index: 11; }
 .info.vehicle.active { opacity: 1; }
