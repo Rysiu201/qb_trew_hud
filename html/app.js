@@ -152,47 +152,32 @@ window.onload = function () {
 
 			setStatus: function(data) {
 
-                                var armorValue = null;
-
-                                if (data.isdead == true) {
-                                        if (document.querySelector('#health').classList.contains('dead') == false) {
-                                                document.querySelector('#health').classList.add('dead');
-                                                for (i = 0; i < data.status.length; i++) { document.querySelector('#'+data.status[i].name+' span').style.height = '0'; }
-                                        }
-                                }
-                                else {
-                                        for (i = 0; i < data.status.length; i++) {
-                                                if ((data.status[i].name == 'hunger') || (data.status[i].name == 'thirst')) { var statusValue = Math.floor(100 - data.status[i].value); }
-                                                else { var statusValue = Math.floor(data.status[i].value); }
-                                                if (document.querySelector('#'+data.status[i].name+' span')) { document.querySelector('#'+data.status[i].name+' span').style.height = statusValue+'%'; }
-                                                if (statusValue <= 35) {
-                                                        if (document.querySelector('#'+data.status[i].name)) {
-                                                                if (document.querySelector('#'+data.status[i].name).classList.contains('dying') == false) {
-                                                                        document.querySelector('#'+data.status[i].name).classList.add('dying');
-                                                                }
-                                                        }
-                                                }
-                                                else {
-                                                        if (document.querySelector('#'+data.status[i].name)) { document.querySelector('#'+data.status[i].name).classList.remove('dying'); }
-
-                                                }
-                                                if (data.status[i].name == 'armor') { armorValue = statusValue; }
-                                        }
-                                        if (document.querySelector('#health').classList.contains('dead')) { document.querySelector('#health').classList.remove('dead'); }
-
-                                        var healthEl = document.querySelector('#health');
-                                        var armorEl = document.querySelector('#armor');
-                                        if (healthEl && armorEl && armorValue !== null) {
-                                                if (armorValue < 1) {
-                                                        armorEl.style.display = 'none';
-                                                        healthEl.classList.add('expanded');
-                                                } else {
-                                                        armorEl.style.display = 'block';
-                                                        healthEl.classList.remove('expanded');
-                                                }
-                                        }
-                                }
-                        },
+				if (data.isdead == true) {
+					if (document.querySelector('#health').classList.contains('dead') == false) {
+						document.querySelector('#health').classList.add('dead');
+						for (i = 0; i < data.status.length; i++) { document.querySelector('#'+data.status[i].name+' span').style.height = '0'; }	
+					}
+				}
+				else {
+					for (i = 0; i < data.status.length; i++) {
+						if ((data.status[i].name == 'hunger') || (data.status[i].name == 'thirst')) { var statusValue = Math.floor(100 - data.status[i].value); }
+						else { var statusValue = Math.floor(data.status[i].value); }
+						if (document.querySelector('#'+data.status[i].name+' span')) { document.querySelector('#'+data.status[i].name+' span').style.height = statusValue+'%'; }
+						if (statusValue <= 35) {
+							if (document.querySelector('#'+data.status[i].name)) {
+								if (document.querySelector('#'+data.status[i].name).classList.contains('dying') == false) {
+									document.querySelector('#'+data.status[i].name).classList.add('dying');	
+								}
+							}
+						}
+						else {
+							if (document.querySelector('#'+data.status[i].name)) { document.querySelector('#'+data.status[i].name).classList.remove('dying'); }
+							
+						}
+					}
+					if (document.querySelector('#health').classList.contains('dead')) { document.querySelector('#health').classList.remove('dead'); }
+				}
+			},
 
 
 			updateWeapon: function(data) {
@@ -226,10 +211,7 @@ window.onload = function () {
 
 
 
-                        updateVehicle: function(data) {
-
-                                if (data.status === true) { document.body.classList.add('inVehicle'); }
-                                else { document.body.classList.remove('inVehicle'); }
+			updateVehicle: function(data) {
 
 				var vehicleInfo = document.querySelector('.info.vehicle');
 				var vehicleSeatbelt = document.querySelector('#seatbelt');
@@ -243,21 +225,25 @@ window.onload = function () {
                                         vehicleFuel.querySelector('i').className = 'fas fa-gas-pump';
                                 }
 				var vehicleCruiser = document.querySelector('#vehicle-speed strong');
-                                var vehiclesCars = [0,1,2,3,4,5,6,7,8,9,10,11,12,17,18,19,20];
+				var vehiclesCars = [0,1,2,3,4,5,6,7,8,9,10,11,12,17,18,19,20];
 
 				if (data.status == true) {
 					if (vehicleInfo.classList.contains('inactive')) {
 
-						vehicleSeatbelt.style.display = 'none';
+						vehicleSeatbelt.style.display = 'hidden';
 						vehicleLights.style.display = 'none';
 						vehicleSignals.style.display = 'none';
 						vehicleFuel.style.display = 'none';
 
-                                                if (vehiclesCars.indexOf(data.type) > -1 && data.type !== 8) {
+						if (vehiclesCars.indexOf(data.type) > -1) {
 							document.querySelector('#vehicle-others').style.display = 'none';
 							document.querySelector('#vehicle-gear').style.display = 'block';
-
-							vehicleSeatbelt.style.display = 'block';
+							
+							if (![8, 13, 14].includes(data.type)) {
+								vehicleSeatbelt.style.visibility = 'visible';
+							} else {
+								vehicleSeatbelt.style.visibility = 'hidden';
+							}
 							vehicleLights.style.display = 'block';
 							vehicleSignals.style.display = 'block';
 							vehicleFuel.style.display = 'block';
@@ -327,17 +313,17 @@ window.onload = function () {
 
 
 
-					if ( (data.seatbelt.status == true) && (vehicleSeatbelt.classList.contains('on') == false) ) {
-						vehicleSeatbelt.classList.remove('off');
-						vehicleSeatbelt.classList.add('on');
-
-						eventCallback.sound('sounds/seatbelt-buckle.ogg', { volume: '0.50' });
-					}
-					else if ( (data.seatbelt.status == false) && (vehicleSeatbelt.classList.contains('off') == false) ) {
-						vehicleSeatbelt.classList.remove('on');
-						vehicleSeatbelt.classList.add('off');
-
-						eventCallback.sound('sounds/seatbelt-unbuckle.ogg', { volume: '0.50' });
+					if (data.type !== 8 && data.type !== 13 && data.type !== 14) {
+						if (data.seatbelt && data.seatbelt.status === true && !vehicleSeatbelt.classList.contains('on')) {
+							vehicleSeatbelt.classList.remove('off');
+							vehicleSeatbelt.classList.add('on');
+							eventCallback.sound('sounds/seatbelt-buckle.ogg', { volume: '0.50' });
+						}
+						else if (data.seatbelt && data.seatbelt.status === false && !vehicleSeatbelt.classList.contains('off')) {
+							vehicleSeatbelt.classList.remove('on');
+							vehicleSeatbelt.classList.add('off');
+							eventCallback.sound('sounds/seatbelt-unbuckle.ogg', { volume: '0.50' });
+						}
 					}
 
 
