@@ -414,18 +414,19 @@ window.onload = function () {
 					else { vehicleFuel.classList.remove('dying'); }
 
 				}
-				else {
-					if (vehicleInfo.classList.contains('active')) {
-						vehicleSeatbelt.classList.remove('on');
-						vehicleCruiser.classList.remove('on');
+                                else {
+                                        vehicleSeatbelt.style.visibility = 'hidden';
+                                        if (vehicleInfo.classList.contains('active')) {
+                                                vehicleSeatbelt.classList.remove('on');
+                                                vehicleCruiser.classList.remove('on');
 
-						vehicleInfo.classList.remove('active');
-						vehicleInfo.classList.add('inactive', 'fadeOut');
+                                                vehicleInfo.classList.remove('active');
+                                                vehicleInfo.classList.add('inactive', 'fadeOut');
 
-						eventCallback.sound();
-					}
+                                                eventCallback.sound();
+                                        }
 
-				}
+                                }
 				
 			},
 			
